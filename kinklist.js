@@ -173,7 +173,12 @@ $(function(){
             inputKinks.parseHash();
 
             // Share / Copy link button
-            $('#Export').on('click', inputKinks.copyShareLink);
+            $('#Export').off('click').on('click', function (e) {
+    e.preventDefault();
+    e.stopPropagation();
+    inputKinks.copyShareLink();
+    return false;
+});
 
             // On resize, redo columns
             (function(){
@@ -329,7 +334,7 @@ fallbackCopy: function (text) {
 
             }
         },
-        export: function(){
+        exportImgur: function(){
             var username = prompt("Please enter your name");
             if(typeof username !== 'string') return;
             else if (username.length ) username = '(' + username + ')';
