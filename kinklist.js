@@ -172,9 +172,8 @@ $(function(){
             // Read hash
             inputKinks.parseHash();
 
-            // Make export button work
-            $('#Export').on('click', inputKinks.export);
-            $('#URL').on('click', function(){ this.select(); });
+            // Share / Copy link button
+            $('#Export').on('click', inputKinks.copyShareLink);
 
             // On resize, redo columns
             (function(){
@@ -226,6 +225,44 @@ $(function(){
                 context.fillText(levels[i], x + 15 + (i * 120), 22);
             }
         },
+
+        copyShareLink: function () {
+    // Always generate the hash from current selections
+    var hash = inputKinks.updateHash();
+
+    // Make it paste-safe: encodeURIComponent protects +, =, etc from being mutated by apps
+    var safeHash = encodeURIComponent(hash);
+
+    // Build the final share URL (preserves your /Klist/ path)
+    var base = window.location.origin + window.location.pathname.replace(/\/?$/, '/');
+    var shareUrl = base + '#' + safeHash;
+
+    // Try modern clipboard API first
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(shareUrl).then(function () {
+            alert('Link copied to clipboard!');
+        }).catch(function () {
+            // Fallback if clipboard is blocked
+            inputKinks.fallbackCopy(shareUrl);
+        });
+    } else {
+        // Older browsers fallback
+        inputKinks.fallbackCopy(shareUrl);
+    }
+},
+fallbackCopy: function (text) {
+    var $tmp = $('<textarea>');
+    $('body').append($tmp);
+    $tmp.val(text).select();
+    try {
+        document.execCommand('copy');
+        alert('Link copied to clipboard!');
+    } catch (e) {
+        alert('Could not auto-copy. Here is the link:\n\n' + text);
+    }
+    $tmp.remove();
+},
+
         setupCanvas: function(width, height, username){
             $('canvas').remove();
             var canvas = document.createElement('canvas');
@@ -529,6 +566,7 @@ $(function(){
         },
         parseHash: function(){
             var hash = location.hash.substring(1);
+           try { hash = decodeURIComponent(hash); } catch (e) {}
             if(hash.length < 10) return;
 
             var values = inputKinks.decode(Object.keys(colors).length, hash);
