@@ -231,30 +231,21 @@ $(function(){
             }
         },
 
-        copyShareLink: function () {
-    // Always generate the hash from current selections
-    var hash = inputKinks.updateHash();
+     copyShareLink: function () {
+  var hash = inputKinks.updateHash();
+  var safeHash = encodeURIComponent(hash);
 
-    // Make it paste-safe: encodeURIComponent protects +, =, etc from being mutated by apps
-    var safeHash = encodeURIComponent(hash);
+  // update the URL bar to the safe version
+  location.hash = safeHash;
 
-    // Build the final share URL (preserves your /Klist/ path)
-    var base = window.location.origin + window.location.pathname.replace(/\/?$/, '/');
-    var shareUrl = base + '#' + safeHash;
+  var base = window.location.origin + window.location.pathname.replace(/\/?$/, '/');
+  var shareUrl = base + '#' + safeHash;
 
-    // Try modern clipboard API first
-    if (navigator.clipboard && navigator.clipboard.writeText) {
-        navigator.clipboard.writeText(shareUrl).then(function () {
-            alert('Link copied to clipboard!');
-        }).catch(function () {
-            // Fallback if clipboard is blocked
-            inputKinks.fallbackCopy(shareUrl);
-        });
-    } else {
-        // Older browsers fallback
-        inputKinks.fallbackCopy(shareUrl);
-    }
+  return (navigator.clipboard && navigator.clipboard.writeText)
+    ? navigator.clipboard.writeText(shareUrl).then(() => alert('Link copied!')).catch(() => inputKinks.fallbackCopy(shareUrl))
+    : inputKinks.fallbackCopy(shareUrl);
 },
+
 fallbackCopy: function (text) {
     var $tmp = $('<textarea>');
     $('body').append($tmp);
@@ -570,20 +561,20 @@ fallbackCopy: function (text) {
             return inputKinks.encode(Object.keys(colors).length, hashValues);
         },
 parseHash: function(){
-    var hash = location.hash.substring(1);
-    try { hash = decodeURIComponent(hash); } catch (e) {}
-    if(hash.length < 10) return;
+  var hash = location.hash.substring(1);
+  try { hash = decodeURIComponent(hash); } catch (e) {}
+  if(hash.length < 10) return;
 
-    // ✅ Clear existing selections first
-    $('#InputList .choices button').removeClass('selected');
+  // CLEAR existing selections first
+  $('#InputList .choices button').removeClass('selected');
 
-    var values = inputKinks.decode(Object.keys(colors).length, hash);
-    var valueIndex = 0;
-    $('#InputList .choices').each(function(){
-        var $this = $(this);
-        var value = values[valueIndex++];
-        $this.children().eq(value).addClass('selected');
-    });
+  var values = inputKinks.decode(Object.keys(colors).length, hash);
+  var valueIndex = 0;
+  $('#InputList .choices').each(function(){
+    var $this = $(this);
+    var value = values[valueIndex++];
+    $this.children().eq(value).addClass('selected');
+  });
 },
 
         saveSelection: function(){
