@@ -569,19 +569,23 @@ fallbackCopy: function (text) {
             });
             return inputKinks.encode(Object.keys(colors).length, hashValues);
         },
-        parseHash: function(){
-            var hash = location.hash.substring(1);
-           try { hash = decodeURIComponent(hash); } catch (e) {}
-            if(hash.length < 10) return;
+parseHash: function(){
+    var hash = location.hash.substring(1);
+    try { hash = decodeURIComponent(hash); } catch (e) {}
+    if(hash.length < 10) return;
 
-            var values = inputKinks.decode(Object.keys(colors).length, hash);
-            var valueIndex = 0;
-            $('#InputList .choices').each(function(){
-                var $this = $(this);
-                var value = values[valueIndex++];
-                $this.children().eq(value).addClass('selected');
-            });
-        },
+    // ✅ Clear existing selections first
+    $('#InputList .choices button').removeClass('selected');
+
+    var values = inputKinks.decode(Object.keys(colors).length, hash);
+    var valueIndex = 0;
+    $('#InputList .choices').each(function(){
+        var $this = $(this);
+        var value = values[valueIndex++];
+        $this.children().eq(value).addClass('selected');
+    });
+},
+
         saveSelection: function(){
             var selection = [];
             $('.choice.selected').each(function(){
